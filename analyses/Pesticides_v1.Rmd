@@ -1,0 +1,216 @@
+---
+title: "Taydin's Pesticide Analysis"
+author: "Dr. Riley M. Anderson & Taydin R. Macon"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+graphics: yes
+output:
+  github_document:
+    toc: yes
+    toc_depth: 5
+    pandoc_args: --webtex
+  html_document:
+    keep_md: yes
+    theme: readable
+    mathjax: default
+  html_notebook:
+    code_folding: hide
+    theme: readable
+    mathjax: default
+  pdf_document:
+    toc: yes
+header-includes:
+  \usepackage{float}
+  \floatplacement{figure}{H}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = F}
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Knitr Options
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# Set root directory to the project directory
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
+# Set default knitr options: 
+# Suppress warnings and messages, cache chunks, 
+#  set default figure size to 6x8 at 300 dpi, and save a png and pdf
+knitr::opts_chunk$set(warning = F, message = F, collapse = T, cache = T,
+    fig.height = 6, fig.width = 8, dpi = 300, # 6x8" @ 300dpi:1800x2400=4.3MP
+    dev = c('png', 'pdf'), dev.args = list(pdf = list(onefile = F)))
+
+```
+
+
+
+## Overview
+
+What is this analysis about?
+
+### Summary of Results
+* 
+
+```{r Main_Code, include = F, cache = F}
+
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Setup - This code is run, but output is hidden
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# Load Packages
+library(tidyverse) # Needed for data wrangling
+library(cowplot) # Needed for publication-quality ggplots
+library(vegan)
+library(randomForest)
+library(caret)
+library(knitr)
+library(blockForest)
+
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Data Preparation
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# Import datasets
+dat1 <- read.csv("data/pesticides.csv")
+
+
+# set seed:
+set.seed(123)
+
+```
+
+
+```{r Data_Wrangling, echo = F, comment = ""}
+
+
+dat1 <- dat1 %>% 
+  mutate(across(c(
+    mortality, year, state, crop,
+    beekeeper, group, Group.Population.ID
+  ), factor),
+  mortality = factor(case_when(
+    mortality == "Alive" ~ "Alive",
+    TRUE ~ "Dead"
+  )))
+
+
+dat2 <- dat1 %>% 
+  select(mortality, sample_ID,
+         year, month, state, crop, beekeeper,
+         Acibenzolar.S.Methyl:tau.Fluvalinate)
+
+dat3 <- dat1 %>% 
+  mutate_at(c(16 : 64),
+            ~replace(., is.na(.), 0))
+
+```
+
+
+```{r RF_everything, echo = F}
+
+
+rfmod <- randomForest(y = dat3$mortality,
+                           x = select(dat3,
+                                      -mortality,
+                                      -sample_number,
+                                      -date,
+                                      -latitude,
+                                      -longitude),
+                           importance = T, nPerm = 999,
+                      proximity = T)
+
+
+# block_mod <- blockForest(dat3$mortality ~ . -
+#                                       -mortality -
+#                                       -sample_number-
+#                                       -date-
+#                                       -latitude-
+#                                       -longitude, dat3,
+#                          blocks = dat3$Group.Population.ID,
+#                          block.method = "BlockForest")
+
+rfmod
+
+train(y = dat3$mortality,
+      x = select(dat3,
+                 -mortality,
+                 -sample_number,
+                 -date,
+                 -latitude,
+                 -longitude),
+      method = "rf", na.action = na.omit)
+
+update(rfmod, mtry = 2)
+
+data.frame(importance(rfmod)) %>% 
+  arrange(desc(MeanDecreaseGini))
+
+imp_vals_top <- data.frame(importance(rfmod)) %>% 
+  arrange(desc(MeanDecreaseGini)) %>% 
+  filter(MeanDecreaseGini > quantile(MeanDecreaseGini, 0.9))
+
+kable(imp_vals_top, format = "markdown", digits = 3)
+
+MDSplot(rfmod, dat3$mortality)
+
+```
+
+
+
+
+```{r RF_pesticides, echo = F}
+
+
+rfmod_pesticide <- randomForest(y = dat3$mortality,
+                           x = select(dat3,
+                                      Acibenzolar.S.Methyl :
+                                        tau.Fluvalinate),
+                           importance = T, nPerm = 999,
+                      proximity = T)
+
+rfmod_pesticide
+
+train(y = dat3$mortality,
+      x = select(dat3,
+                 Acibenzolar.S.Methyl :
+                   tau.Fluvalinate),
+      method = "rf", na.action = na.omit)
+
+update(rfmod_pesticide, mtry = 2)
+
+data.frame(importance(rfmod)) %>% 
+  arrange(desc(MeanDecreaseGini))
+
+imp_vals_top_pesticide <- data.frame(importance(
+  rfmod_pesticide)
+  ) %>% 
+  arrange(desc(MeanDecreaseGini)) %>% 
+  filter(MeanDecreaseGini > quantile(MeanDecreaseGini, 0.9))
+
+kable(imp_vals_top_pesticide,
+      format = "markdown", digits = 3)
+
+MDSplot(rfmod_pesticide, dat3$mortality)
+
+```
+
+
+```{r NMDS_pesticides_data_prep, echo = F}
+
+
+
+```
+
+
+## Session Information
+
+```{r Session_Info, echo = F, comment = ""}
+
+# Add session information to help with reproduceability
+sessionInfo()
+
+
+```
+
+
