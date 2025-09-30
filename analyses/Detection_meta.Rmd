@@ -1,0 +1,233 @@
+---
+title: "Meta Analysis Workflow"
+author: "Dr. Riley M. Anderson"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+graphics: yes
+output:
+  github_document:
+    toc: yes
+    toc_depth: 5
+    pandoc_args: --webtex
+  html_document:
+    keep_md: yes
+    theme: readable
+    mathjax: default
+  html_notebook:
+    code_folding: hide
+    theme: readable
+    mathjax: default
+  pdf_document:
+    toc: yes
+header-includes:
+  \usepackage{float}
+  \floatplacement{figure}{H}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include = F}
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Knitr Options
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# Set root directory to the project directory
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+
+# Set default knitr options: 
+# Suppress warnings and messages, cache chunks, 
+#  set default figure size to 6x8 at 300 dpi, and save a png and pdf
+knitr::opts_chunk$set(warning = F, message = F, collapse = T, cache = T,
+    fig.height = 6, fig.width = 8, dpi = 300, # 6x8" @ 300dpi:1800x2400=4.3MP
+    dev = c('png', 'pdf'), dev.args = list(pdf = list(onefile = F)))
+
+```
+
+
+
+## Overview
+
+This is a test of some meta analysis packages and a template for the workflow.
+
+### Summary of Results
+* 
+
+```{r Main_Code, include = F, cache = F}
+
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Setup - This code is run, but output is hidden
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+install.packages(c("metafor", "meta", "dmetar",
+                   "robumeta", "clubSandwich",
+                   "weightr"))
+
+# Load Packages
+library(tidyverse) # Needed for data wrangling: dplyr, tidyr, ggplot2
+library(metafor)
+library(glmmTMB)
+library(sjPlot)
+library(DHARMa)
+
+
+
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# @@@@@ Data Preparation
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# Import datasets
+d <- read.csv("data/Complied.CleanedTM.Meta.csv")
+
+
+
+overdispersion_test <- function(model, type = "pearson"){
+    
+    # Get the pearson residuals
+    residuals <- resid(model, type = type)
+    
+    # Get the residual degrees of freedom of the model
+    df <- df.residual(model)
+    
+    # Sum of residual deviance
+    dev <- sum(residuals ^ 2)
+    
+    # Overdispersion = sum of squared residuals / residual degrees of freedom
+    ratio <- round(dev / df, 3)
+    
+    # P-value 
+    pvalue <- round(pchisq(dev, df, lower.tail = FALSE), 3)
+    
+    # Get the formula
+    f = paste(as.character(formula(model))[2:3], collapse = " ~ ")
+    
+    # Get the model name
+    name <- deparse(substitute(model))
+    cat("Overdispersion ratio for model:", name, "\nformula:", f, 
+        "\n\nAcceptable range: 1 - 1.4\nOverdispersion ratio:",
+        ratio, " df:", df, " p =", pvalue, "\n", 
+        ifelse(pvalue < 0.05, "Data are OVERDISPERSED\n", 
+        "Data are NOT OVERDISPERSED\n"))
+    
+    # Return all the parameters
+    return(c(ratio = ratio, deviance = dev, df = df, pvalue = pvalue))
+    
+}
+
+
+
+```
+
+
+```{r Data_Wrangling, echo = F, comment = ""}
+
+
+d1 <- d %>% 
+  select(-Article.Title, -Prob.Trad, -Prob.eDNA,
+         -Total.eDNA.Samples..units.are.day.site.samples. :
+           -Calc.Vari.Trad.TotalSamp, -Traditional.Cost,
+         -eDNA..Cost) %>% 
+  mutate(author = word(Authors, 1, sep = fixed("_")),
+         pub_date = dmy(Publication.Year),
+         pub_year = year(pub_date),
+         paper = paste(author, pub_year, sep = "_")) %>% 
+  group_by(paper) %>% 
+  mutate(study = row_number(),
+         study = paste(paper, study, sep = "_")) %>% 
+  ungroup() %>%
+  select(-Authors, -pub_date, -pub_year, -Publication.Year) %>% 
+  mutate(across(c(
+    Species, Genetic.Markers:study
+  ), factor)) %>% 
+  pivot_longer(cols = c(Pos.Trad, Pos.eDNA),
+               names_to = "detect_method",
+               values_to = "detections") %>% 
+  select(-n.traditional) %>% 
+  rename(n_samples = n.edna) %>% 
+  mutate(detect_method = factor(detect_method),
+         misses = n_samples - detections,
+         detect_method = case_when(
+           detect_method == "Pos.Trad" ~ "Traditional",
+           TRUE ~ "eDNA"
+         ))
+
+```
+
+## GLMM approach
+
+With a glmm we can account for within and across study variance and use the direct counts from each study. No need for effect size and variance estimation.
+
+Moreover, if we can get a random slope to coverge, this approach exactly mirrors that of a multilevel random-effects meta-analysis.
+```{r GLMM, echo = F}
+
+mod1 <- glmmTMB(cbind(detections, misses) ~ detect_method +
+                  (1 | paper) + 
+                  (1 | study),
+                data = d1, family = binomial("logit"))
+summary(mod1)
+
+plot_model(mod1, type = "pred")
+
+
+
+
+mod2 <- glmmTMB(cbind(detections, misses) ~ detect_method + 
+                  (1 + detect_method | paper) + 
+                  (1 | study),
+                data = d1, family = binomial("logit"))
+summary(mod2)
+plot_model(mod2, type = "est")
+
+
+
+mod3 <- glmmTMB(cbind(detections, misses) ~ detect_method + 
+                  (1 | paper) + 
+                  (1 + detect_method | study),
+                data = d1, family = binomial("logit"))
+summary(mod3)
+
+summary(mod3)$varcor
+
+plot_model(mod3, type = "pred")
+
+anova(mod1, mod3, test = "Chisq")
+
+
+sim_res <- simulateResiduals(mod3)
+
+plot(sim_res)
+testDispersion(sim_res)
+
+
+```
+
+
+```{r Graph_name, echo = F}
+
+```
+
+
+```{r Graph_name, echo = F}
+
+
+
+```
+
+
+```{r Graph_name, echo = F}
+
+
+
+```
+
+
+## Session Information
+
+```{r Session_Info, echo = F, comment = ""}
+
+# Add session information to help with reproduceability
+sessionInfo()
+
+
+```
+
+
