@@ -199,6 +199,8 @@ mirrors that of a multilevel random-effects meta-analysis.
 ![](Detection_meta_files/figure-gfm/pred_fig_mod9-2.png)<!-- -->
 ![](Detection_meta_files/figure-gfm/pred_fig_mod9-3.png)<!-- -->
 
+![](Detection_meta_files/figure-gfm/pred_fig_mod9_with_raw-1.png)<!-- -->
+
 ![](Detection_meta_files/figure-gfm/publication_year-1.png)<!-- -->
 
 ## Session Information

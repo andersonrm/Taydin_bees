@@ -413,7 +413,9 @@ mod9_pairs <- pairs(mod9_emm_pred, by = "organism") %>%
   )) %>% 
   left_join(., y_position, by = "organism") %>% 
   mutate(p_value = paste(formatC(p.value, format = "e", 1),
-                         p, sep = " "))
+                         p, sep = " "),
+         odds_ratio = paste(round(odds.ratio, 2),
+                            p, sep = " "))
 
 
 mod9_cld %>% 
@@ -443,7 +445,41 @@ mod9_cld %>%
   
 ```
 
+```{r pred_fig_mod9_with_raw, echo = F}
 
+
+mod9_cld %>% 
+  ggplot(aes(x = organism, y = prob, color = detect_method)) +
+  geom_point(position = position_dodge(width = 0.5),
+             size = 3, shape = 18) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                position = position_dodge(width = 0.5),
+                width = 0) +
+  geom_text(data = mod9_pairs,
+            aes(x = organism,
+                y = max_ucl,
+                label = odds_ratio,
+                color = NULL),
+            vjust=0, position = position_dodge(width = 0.5),
+            show.legend = F,
+            size = 4) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0.5), linetype = 2,
+             color = "grey") +
+  labs(x = NULL, y = "Pr(detection)",
+       color = NULL) +
+  scale_y_continuous(limits = c(0, 1.2),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent) +
+  scale_color_manual(values = c("orange", "purple")) +
+  geom_jitter(data = subset(d2, organism != "Hydrozoan"),
+              aes(x = organism, y = detections/samples,
+                  color = detect_method),
+              position = position_dodge(width = 0.5),
+              shape = 21)
+  
+```
 
 
 ```{r publication_year, echo = F}
