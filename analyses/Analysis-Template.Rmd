@@ -98,7 +98,9 @@ dat <- data.frame(
 ```{r model, echo = F}
 
 # --- 1. Random-effects meta-analysis (REML + Hartung–Knapp) ---
-res <- rma(yi, vi, data = dat, method = "REML", test = "knha")
+res <- rma.mv(yi, vi, mods = x, 
+              data = dat, method = "REML",
+              test = "knha")
 summary(res)
 
 ```
