@@ -1,6 +1,6 @@
 ---
-title: "Meta Analysis Workflow"
-author: "Dr. Riley M. Anderson"
+title: "Detection Methods Meta-analysis"
+author: "Dr. Riley M. Anderson & Taydin Macon"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 graphics: yes
 output:
@@ -47,7 +47,7 @@ knitr::opts_chunk$set(warning = F, message = F, collapse = T, cache = T,
 
 ## Overview
 
-This is a test of some meta analysis packages and a template for the workflow.
+A meta-analysis comparing detection probabilities of traditional and eDNA methods.
 
 ### Summary of Results
 * 
@@ -68,13 +68,15 @@ library(DHARMa)
 library(emmeans)
 library(multcomp)
 library(tidyverse) # Needed for data wrangling: dplyr, tidyr, ggplot2
+library(cowplot)
+
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @@@@@ Data Preparation
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 # Import datasets
-d <- read.csv("data/Complied.CleanedTM.Meta2.csv")
+d <- read.csv("data/Complied.CleanedTM.Meta3.csv")
 
 body_length <- read.csv("data/Meta.body.length.csv")
 
@@ -121,37 +123,78 @@ overdispersion_test <- function(model, type = "pearson"){
 
 ```{r Data_Wrangling, echo = F, comment = ""}
 
+## Comparisons at study level:
+
+d1 <- d %>%  
+  select(Authors,
+         Publication.Year, 
+         Species,
+         n.traditional...,
+         n.edna..,
+         Pos.Trad,
+         Pos.eDNA,
+         Genetic.Markers,
+         Methods,
+         Organism.Type,
+         Collection.Methods.eDNA) %>% 
+  mutate(author = word(Authors, 1, sep = fixed("_")),
+         pub_date = dmy(Publication.Year),
+         pub_year = year(pub_date),
+         paper = paste(author, pub_year, sep = "_")) %>% 
+  group_by(paper) %>% 
+  mutate(study = row_number(),
+         study = paste(paper, study, sep = "_")) %>% 
+  ungroup() %>% 
+  select(-Authors, -pub_date, -Publication.Year) %>%
+  mutate(across(c(
+    Species, Genetic.Markers : author, paper, study
+  ), factor),
+  across(c(n.traditional... : Pos.eDNA, pub_year), as.numeric)) %>% 
+  rename(trad_n = n.traditional...,
+         eDNA_n = n.edna..,
+         trad_pos = Pos.Trad,
+         eDNA_pos = Pos.eDNA) %>% 
+  pivot_longer(cols = c(trad_n, eDNA_n, trad_pos, eDNA_pos),
+               names_to = c("detect_method", ".value"),
+               names_sep = "_") %>% 
+  mutate(detect_method = factor(detect_method),
+         misses = n - pos,
+         detect_method = factor(case_when(
+           detect_method == "trad" ~ "Traditional",
+           TRUE ~ "eDNA"))) %>% 
+  rename(detections = pos,
+         organism = Organism.Type,
+         col_method_edna = Collection.Methods.eDNA) %>% 
+  mutate(organism = factor(case_when(
+    organism == "Amphibian " ~ "Amphibian",
+    organism == "Crustacean " ~ "Crustacean",
+    organism == "Fish " ~ "Fish",
+    organism == "Hydrozoan " ~ "Hydrozoan",
+    organism == "Reptile " ~ "Reptile",
+    TRUE ~ organism)),
+    col_method_edna = factor(case_when(
+      col_method_edna == "Soil" ~ "Soil",
+      TRUE ~ "Water filter"
+    ))) %>% 
+  mutate(detect_method = fct_relevel(detect_method,
+                                     "Traditional",
+                                     "eDNA"),
+         d_method = factor(case_when(
+           detect_method == "Traditional" &
+             Methods == "Passive" ~ "trad_passive",
+           detect_method == "Tradtional" &
+             Methods != "Passive" ~ "trad_active",
+           detect_method == "eDNA" ~ "eDNA"
+         )),
+         d_method = factor(case_when(
+           is.na(d_method) ~ "trad_active",
+           TRUE ~ d_method
+         ))) %>% 
+  subset(organism != "Hydrozoan")
 
 
-# d1 <- d %>% 
-#   select(-Article.Title, -Prob.Trad, -Prob.eDNA,
-#          -Total.eDNA.Samples..units.are.day.site.samples. :
-#            -Calc.Vari.Trad.TotalSamp, -Traditional.Cost,
-#          -eDNA..Cost) %>% 
-#   mutate(author = word(Authors, 1, sep = fixed("_")),
-#          pub_date = dmy(Publication.Year),
-#          pub_year = year(pub_date),
-#          paper = paste(author, pub_year, sep = "_")) %>% 
-#   group_by(paper) %>% 
-#   mutate(study = row_number(),
-#          study = paste(paper, study, sep = "_")) %>% 
-#   ungroup() %>%
-#   select(-Authors, -pub_date, -Publication.Year) %>% 
-#   mutate(across(c(
-#     Species, Genetic.Markers:study
-#   ), factor)) %>% 
-#   pivot_longer(cols = c(Pos.Trad, Pos.eDNA),
-#                names_to = "detect_method",
-#                values_to = "detections") %>% 
-#   select(-n.traditional...) %>% 
-#   rename(n_sites = n.edna..) %>% 
-#   mutate(detect_method = factor(detect_method),
-#          misses = n_sites - detections,
-#          detect_method = case_when(
-#            detect_method == "Pos.Trad" ~ "Traditional",
-#            TRUE ~ "eDNA"
-#          ))
-
+#############################################3
+## comparisons at sample level:
 
 d2 <- d %>%  
   select(Authors,
@@ -213,61 +256,194 @@ body_length <- body_length %>%
   rename(organism = Organism.Type) %>% 
   select(-organism)
 
-d2 <- d2 %>% 
-  left_join(., body_length, by = "Species")
+# d2 <- d2 %>% 
+#   left_join(., body_length, by = "Species")
 
 
 ```
 
-## GLMM approach
+# GLMM approach
 
 With a glmm we can account for within and across study variance and use the direct counts from each study. No need for effect size and variance estimation.
 
 Moreover, if we can get a random slope to coverge, this approach exactly mirrors that of a multilevel random-effects meta-analysis.
+
+## Study-level analysis
 ```{r GLMM, echo = F}
 
-# mod1 <- glmmTMB(cbind(detections, misses) ~ detect_method +
-#                   (1 | paper) + 
-#                   (1 | study),
-#                 data = d1, family = binomial("logit"))
-# summary(mod1)
-# 
-# plot_model(mod1, type = "pred")
-# 
-# 
-# 
-# 
-# mod2 <- glmmTMB(cbind(detections, misses) ~ detect_method + 
-#                   (1 + detect_method | paper) + 
-#                   (1 | study),
-#                 data = d1, family = binomial("logit"))
-# summary(mod2)
-# plot_model(mod2, type = "est")
-# 
-# 
-# 
-# mod3 <- glmmTMB(cbind(detections, misses) ~ detect_method + 
-#                   (1 | paper) + 
-#                   (1 + detect_method | study),
-#                 data = d1, family = binomial("logit"))
-# summary(mod3)
-# 
-# summary(mod3)$varcor
-# 
-# plot_model(mod3, type = "pred")
-# 
-# anova(mod1, mod3, test = "Chisq")
-# 
-# 
-# sim_res <- simulateResiduals(mod3)
-# 
-# plot(sim_res)
-# testDispersion(sim_res)
+study_modR1 <- glmmTMB(cbind(detections, misses) ~ detect_method +
+                        (1 | paper), family = binomial("logit"),
+                      data = d1)
+
+study_modR2 <- glmmTMB(cbind(detections, misses) ~ detect_method +
+                        (1 | paper) + (1 | study),
+                       family = binomial("logit"),
+                      data = d1)
+
+study_modR3 <- glmmTMB(cbind(detections, misses) ~ detect_method +
+                        (1 | paper) + (1 + detect_method | study),
+                       family = binomial("logit"),
+                      data = d1)
+
+anova(study_modR2, study_modR2, study_modR3, test = "chisq")
+# need full random effect structure ^
+
+summary(study_modR3)
+
+study_mod2 <- glmmTMB(cbind(detections, misses) ~ detect_method *
+                        organism + scale(pub_year) : detect_method +
+                        (1 | paper) + 
+                        (1 + detect_method | study),
+                      family = binomial("logit"),
+                      data = d1)
+
+study_mod3 <- glmmTMB(cbind(detections, misses) ~ detect_method *
+                        organism + scale(pub_year) +
+                        (1 | paper) + 
+                        (1 + detect_method | study),
+                      family = binomial("logit"),
+                      data = d1)
+
+study_mod4 <- glmmTMB(cbind(detections, misses) ~ detect_method *
+                        organism + scale(pub_year) : detect_method +
+                        col_method_edna +
+                        (1 | paper) + 
+                        (1 + detect_method | study),
+                      family = binomial("logit"),
+                      data = d1)
+
+summary(study_mod2)
+
+# study_mod5 <- glmmTMB(cbind(detections, misses) ~ d_method *
+#                         organism +
+#                         (1 | paper) +
+#                         (1 | study),
+#                       family = binomial("logit"),
+#                       data = d1)
+
+
+anova(study_mod2, study_mod3, study_mod4, type = "chisq")
+
+sim_res_mod2 <- simulateResiduals(study_mod2)
+
+plot(sim_res_mod2)
+testDispersion(sim_res_mod2)
 
 
 ```
 
 
+## Study-level main figure:
+```{r study_pred_fig_mod9, echo = F, fig.width=9, fig.height=5}
+summary(study_mod2)
+
+plot_model(study_mod2, type = "re")
+
+
+
+mod2_emm_pred <- emmeans(study_mod2, ~detect_method * organism,
+                         type = "response")
+
+
+mod2_cld <- cld(mod2_emm_pred, sort = F,
+                 response = T, Letters = c("abcdef"))
+
+mod2_cld$.group <- gsub(" ", "", mod2_cld$.group)
+mod2_cld <- as_tibble(mod2_cld)
+
+y_position_mod2 <- mod2_cld %>% 
+  group_by(organism) %>% 
+  summarise(max_ucl = max(asymp.UCL) + 0.15)
+
+mod2_pairs <- pairs(mod2_emm_pred, by = "organism") %>% 
+  as_tibble() %>% 
+  mutate(p = case_when(
+    p.value < 0.05 ~ "*",
+    p.value < 0.005 ~ "**",
+    TRUE ~ " "
+  )) %>% 
+  left_join(., y_position_mod2, by = "organism") %>% 
+  mutate(p_value = paste(formatC(p.value, format = "e", 1),
+                         p, sep = " "),
+         odds_ratio = paste(round(odds.ratio, 2),
+                            p, sep = " "))
+
+
+mod2_cld %>% 
+  ggplot(aes(x = organism, y = prob, color = detect_method)) +
+  geom_point(position = position_dodge(width = 0.5),
+             size = 4, shape = 18) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                position = position_dodge(width = 0.5),
+                width = 0) +
+  geom_text(data = mod2_pairs,
+            aes(x = organism,
+                y = max_ucl,
+                label = p,
+                color = NULL),
+            vjust=.7, position = position_dodge(width = 0.5),
+            show.legend = F,
+            size = 6) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0.5), linetype = 2,
+             color = "grey") +
+  labs(x = NULL, y = "Pr(detection)",
+       color = NULL) +
+  scale_y_continuous(limits = c(0, 1.2),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent) +
+  scale_color_manual(values = c("orange", "purple")) +
+  geom_point(data = subset(d1),
+              aes(x = organism, y = detections/n,
+                  color = detect_method),
+              position = position_jitterdodge(
+                jitter.width = 0.4,
+                jitter.height = 0,
+                dodge.width = 0.5
+              ),
+              shape = 21, alpha = 0.5)
+  
+
+study_level_fig <- mod2_cld %>% 
+  ggplot(aes(x = organism, y = prob, color = detect_method)) +
+  geom_point(position = position_dodge(width = 0.5),
+             size = 4, shape = 18) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                position = position_dodge(width = 0.5),
+                width = 0) +
+  geom_text(data = mod2_pairs,
+            aes(x = organism,
+                y = max_ucl,
+                label = p,
+                color = NULL),
+            vjust=.7, position = position_dodge(width = 0.5),
+            show.legend = F,
+            size = 6) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0.5), linetype = 2,
+             color = "grey") +
+  labs(x = NULL, y = "Pr(detection)",
+       color = NULL) +
+  scale_y_continuous(limits = c(0, 1.2),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent) +
+  scale_color_manual(values = c("orange", "purple")) +
+  geom_point(data = subset(d1),
+              aes(x = organism, y = detections/n,
+                  color = detect_method),
+              position = position_jitterdodge(
+                jitter.width = 0.4,
+                jitter.height = 0,
+                dodge.width = 0.5
+              ),
+              shape = 21, alpha = 0.5)
+
+```
+
+
+## Sample-level analysis:
 ```{r models_with_new_data, echo = F}
 
 mod4 <- glmmTMB(cbind(detections, misses) ~ detect_method +
@@ -275,7 +451,7 @@ mod4 <- glmmTMB(cbind(detections, misses) ~ detect_method +
                   (1 | study),
                 data = subset(d2, organism != "Hydrozoan"),
                 family = binomial("logit"))
-# summary(mod4)
+summary(mod4)
 # 
 # plot_model(mod4, type = "pred")
 
@@ -307,8 +483,6 @@ mod6 <- glmmTMB(cbind(detections, misses) ~ detect_method +
 
 
 
-
-
 mod7 <- glmmTMB(cbind(detections, misses) ~ detect_method +
                   organism + Methods + 
                   (1 | paper) + (1 + detect_method | study),
@@ -336,6 +510,7 @@ sim_res <- simulateResiduals(mod9)
 overdispersion_test(mod9)
 plot(sim_res)
 testDispersion(sim_res)
+
 
 summary(mod9)
 plot_model(mod9, type = "pred",
@@ -386,7 +561,8 @@ pairs(mod9_emm, by = "organism")
 ```
 
 
-```{r pred_fig_mod9, echo = F, fig.width=8, fig.height=6}
+
+```{r pred_fig_mod9, echo = F, fig.width=9, fig.height=5}
 summary(mod9)
 
 plot_model(mod9, type = "re")
@@ -402,7 +578,7 @@ mod9_cld <- as_tibble(mod9_cld)
 
 y_position <- mod9_cld %>% 
   group_by(organism) %>% 
-  summarise(max_ucl = max(asymp.UCL) + 0.15)
+  summarise(max_ucl = max(asymp.UCL) + 0.05)
 
 mod9_pairs <- pairs(mod9_emm_pred, by = "organism") %>% 
   as_tibble() %>% 
@@ -438,58 +614,99 @@ mod9_cld %>%
              color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
-  scale_y_continuous(limits = c(0, 1.2),
+  scale_y_continuous(limits = c(0, 1.05),
                      breaks = c(0, 0.25, 0.5, 0.75, 1),
                      labels = scales::percent) +
   scale_color_manual(values = c("orange", "purple"))
   
 ```
 
-```{r pred_fig_mod9_with_raw, echo = F}
+```{r pred_fig_mod9_with_raw, echo = F, fig.width = 9, fig.height=5}
+
+
+mod4_emm <- emmeans(mod4, ~ detect_method, type = "response")
+pairs(mod4_emm)
 
 
 mod9_cld %>% 
   ggplot(aes(x = organism, y = prob, color = detect_method)) +
   geom_point(position = position_dodge(width = 0.5),
-             size = 3, shape = 18) +
+             size = 4, shape = 18) +
   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                 position = position_dodge(width = 0.5),
                 width = 0) +
   geom_text(data = mod9_pairs,
             aes(x = organism,
                 y = max_ucl,
-                label = odds_ratio,
+                label = p,
                 color = NULL),
-            vjust=0, position = position_dodge(width = 0.5),
+            vjust = .7, position = position_dodge(width = 0.5),
             show.legend = F,
-            size = 4) +
+            size = 6) +
   coord_flip() +
   theme_minimal(base_size = 18) +
   geom_hline(aes(yintercept = 0.5), linetype = 2,
              color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
-  scale_y_continuous(limits = c(0, 1.2),
+  scale_y_continuous(limits = c(0, 1.05),
                      breaks = c(0, 0.25, 0.5, 0.75, 1),
                      labels = scales::percent) +
   scale_color_manual(values = c("orange", "purple")) +
-  geom_jitter(data = subset(d2, organism != "Hydrozoan"),
+  geom_point(data = subset(d2, organism != "Hydrozoan"),
               aes(x = organism, y = detections/samples,
                   color = detect_method),
-              position = position_dodge(width = 0.5),
+              position = position_jitterdodge(
+                jitter.width = 0.2,
+                jitter.height = 0,
+                dodge.width = 0.5
+              ),
               shape = 21)
-  
+
+
+sample_level_fig <- mod9_cld %>% 
+  ggplot(aes(x = organism, y = prob, color = detect_method)) +
+  geom_point(position = position_dodge(width = 0.5),
+             size = 4, shape = 18) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                position = position_dodge(width = 0.5),
+                width = 0) +
+  geom_text(data = mod9_pairs,
+            aes(x = organism,
+                y = max_ucl,
+                label = p,
+                color = NULL),
+            vjust = .7, position = position_dodge(width = 0.5),
+            show.legend = F,
+            size = 6) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0.5), linetype = 2,
+             color = "grey") +
+  labs(x = NULL, y = "Pr(detection)",
+       color = NULL) +
+  scale_y_continuous(limits = c(0, 1.05),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     labels = scales::percent) +
+  scale_color_manual(values = c("orange", "purple")) +
+  geom_point(data = subset(d2, organism != "Hydrozoan"),
+              aes(x = organism, y = detections/samples,
+                  color = detect_method),
+              position = position_jitterdodge(
+                jitter.width = 0.2,
+                jitter.height = 0,
+                dodge.width = 0.5
+              ),
+              shape = 21)
 ```
 
 
-```{r publication_year, echo = F}
+```{r composite_fig_1, echo = F}
 
-d2 %>% 
-  subset(organism != "Hydrozoan" &
-         detect_method == "eDNA") %>% 
-  ggplot(aes(x = pub_year, y = detections/samples)) +
-  geom_point() +
-  geom_smooth(method = "lm")
+plot_grid(study_level_fig,
+          sample_level_fig,
+          labels = c("A", "B"),
+          ncol = 1)
 
 
 ```
@@ -497,43 +714,34 @@ d2 %>%
 
 
 
+```{r active_passive_sampling, echo = F}
 
-```{r random_slope_fig1, echo = F}
+d1_trad <- d1 %>% 
+  subset(detect_method == "Traditional")
 
-# plot_model(mod9, type  = "re")
-# 
-# 
-# re_mod9 <- ranef(mod9)$cond$study %>% as.data.frame()
-# colnames(re_mod9) <- c("x", "y")
-# 
-# re_mod9 <- re_mod9 %>% 
-#   rownames_to_column("study")
-# 
-# 
-# study_orgs <- d2 %>% select(study, organism, Ave.length.MM) %>% 
-#   distinct()
-# 
-# re_mod9 <- re_mod9 %>% 
-#   left_join(., study_orgs, by = "study") 
-# 
-# re_mod9 %>% 
-#   ggplot(aes(x = x, y = y, color = organism, group = organism)) +
-#   geom_point(aes(size = Ave.length.MM),
-#              show.legend = F) +
-#   geom_smooth(method = "lm") +
-#   labs(x = "Baseline detection",
-#        y = "Slope\n(eDNA vs. Traditional)") +
-#   geom_vline(aes(xintercept = 0)) +
-#   geom_hline(aes(yintercept = 0)) +
-#   theme_minimal() +
-#   scale_color_viridis_d(option = "C") +
-#   geom_text(aes(label = organism))
-# 
-# 
-#   ggrepel::geom_text_repel(aes(label = study),
-#                   max.overlaps = 15,
-#                   show.legend = F)
+trad_mod1 <- glmmTMB(cbind(detections, misses) ~ Methods *
+                       organism +
+                       (1 | paper) +
+                       (1 | study),
+                     family = binomial("logit"),
+                     data = d1_trad)
 
+summary(trad_mod1)
+
+plot_model(trad_mod1,
+           type = "pred",
+           terms = c("organism", "Methods"))
+
+```
+
+
+
+# Metaphor models:
+
+```{r meta_analytic_mods, echo = F}
+
+
+meta_mod1 <- rma.mv()
 
 
 ```
