@@ -386,8 +386,6 @@ mod2_cld %>%
             size = 6) +
   coord_flip() +
   theme_minimal(base_size = 18) +
-  geom_hline(aes(yintercept = 0.5), linetype = 2,
-             color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
   scale_y_continuous(limits = c(0, 1.2),
@@ -422,8 +420,6 @@ study_level_fig <- mod2_cld %>%
             size = 6) +
   coord_flip() +
   theme_minimal(base_size = 18) +
-  geom_hline(aes(yintercept = 0.5), linetype = 2,
-             color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
   scale_y_continuous(limits = c(0, 1.2),
@@ -610,8 +606,6 @@ mod9_cld %>%
             size = 4) +
   coord_flip() +
   theme_minimal(base_size = 18) +
-  geom_hline(aes(yintercept = 0.5), linetype = 2,
-             color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
   scale_y_continuous(limits = c(0, 1.05),
@@ -646,8 +640,6 @@ mod9_cld %>%
             size = 6) +
   coord_flip() +
   theme_minimal(base_size = 18) +
-  geom_hline(aes(yintercept = 0.5), linetype = 2,
-             color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
   scale_y_continuous(limits = c(0, 1.05),
@@ -682,8 +674,6 @@ sample_level_fig <- mod9_cld %>%
             size = 6) +
   coord_flip() +
   theme_minimal(base_size = 18) +
-  geom_hline(aes(yintercept = 0.5), linetype = 2,
-             color = "grey") +
   labs(x = NULL, y = "Pr(detection)",
        color = NULL) +
   scale_y_continuous(limits = c(0, 1.05),
@@ -738,7 +728,145 @@ plot_model(trad_mod1,
 ```
 
 # Log odds for study level analysis - Taydin is still working on this. 
-# need to flip the signs so that way its consistent with the other figures, need to also clean it up 
+```{r meta_analysis_data_prep, echo = F, eval = F}
+
+# tried this but not worth it. Converting the GLMM estimates to log odds avoids introducing arbitrary continuity corrections.
+# 
+# d1 <- d1 %>% 
+#   mutate(raw_prop = detections / n,
+#          prop = pmax(pmin(raw_prop, 1 - 1e-6), 1e-6),
+#          logit_props = log(prop / (1 - prop)),
+#          var_logit_props = 1 / (n * prop * (1 - prop)))
+# 
+# hist(pmin(d1$prop, 1 - 1e-6))
+# hist(d1$raw_prop)
+# d2 <- d2 %>% 
+#   mutate(prop = detections / samples,
+#          prop = pmax(pmin(prop, 1 - 1e-6), 1e-6),
+#          logit_props = log(prop / (1 - prop)),
+#          var_logit_props = 1 / (samples * prop * (1 - prop))) 
+
+```
+
+```{r meta_analysis_study_level, echo = F, eval = F}
+
+# ignore. This chunk is not run.
+study_meta1 <- rma.mv(yi = logit_props,
+                      V = var_logit_props,
+                      mods = ~ detect_method,
+                      random = list(~ 1 | paper,
+                                    ~ detect_method | study),
+                      method = "REML",
+                      data = d1)
+
+summary(study_meta1)
+
+```
+
+# Log odds
+
+## Log odds study level
+
+```{r log_odds_study_level, echo = F}
+
+# get overall contrast:
+study_odds_overall <- emmeans(study_mod2, ~ detect_method,
+                              type = "link")
+
+study_contr_overall <- contrast(study_odds_overall,
+                                method = "pairwise")
+
+study_overall <- summary(study_contr_overall, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  mutate(organism = "Overall")
+
+
+# Get organism level contrasts:
+study_odds <- emmeans(study_mod2, ~ detect_method | organism,
+                type = "link")
+
+contr_study <- contrast(study_odds, method = "pairwise")
+
+summary(contr_study, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., study_overall) %>% 
+  mutate(star = case_when(
+    p.value <= 0.05 ~ "*",
+    TRUE ~ " "),
+    organism = factor(organism, levels = c(
+      "Arthropod", "Reptile", "Mammal",
+      "Crustacean", "Amphibian", "Fish",
+      "Mollusc", "Overall"
+    ))) %>% 
+  ggplot(aes(x = organism, y = estimate)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0) +
+  geom_text(aes(x = organism, y = asymp.UCL,
+                label = star),
+            hjust = -1) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Log Odds") +
+  geom_hline(aes(yintercept = 0), 
+             linetype = 2, alpha = 0.5)
+
+
+  
+```
+
+## Log-odds sample level
+```{r log_odds_sample_level, echo = F}
+
+# get overall contrast:
+sample_odds_overall <- emmeans(mod9, ~ detect_method,
+                              type = "link")
+
+sample_contr_overall <- contrast(sample_odds_overall,
+                                method = "pairwise")
+
+sample_overall <- summary(sample_contr_overall, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  mutate(organism = "Overall")
+
+
+# Get organism level contrasts:
+sample_odds <- emmeans(mod9, ~ detect_method | organism,
+                type = "link")
+
+contr_sample <- contrast(sample_odds, method = "pairwise")
+
+summary(contr_sample, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., sample_overall) %>% 
+  mutate(star = case_when(
+    p.value <= 0.05 ~ "*",
+    TRUE ~ " "),
+    organism = factor(organism, levels = c(
+      "Arthropod", "Reptile", "Mammal",
+      "Crustacean", "Amphibian", "Fish",
+      "Mollusc", "Overall"
+    ))) %>% 
+  ggplot(aes(x = organism, y = estimate)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0) +
+  geom_text(aes(x = organism, y = asymp.UCL,
+                label = star),
+            hjust = -1) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Log Odds") +
+  geom_hline(aes(yintercept = 0), 
+             linetype = 2, alpha = 0.5)
+
+
+  
+```
+
+
+
+
 
 ```{r, echo = F}
   
@@ -763,15 +891,6 @@ odds <- bind_rows(mod2_emm_odds,mod9_emm_odds) %>%
 
 ```
 
-# Metaphor models:
-
-```{r meta_analytic_mods, echo = F}
-
-
-meta_mod1 <- rma.mv()
-
-
-```
 
 
 ## Session Information
