@@ -615,7 +615,7 @@ mod9_cld %>%
   
 ```
 
-```{r pred_fig_mod9_with_raw, echo = F, fig.width = 9, fig.height=5}
+```{r pred_fig_mod9_with_raw, echo = F, fig.width = 9, fig.height=5, cache=F}
 
 
 mod4_emm <- emmeans(mod4, ~ detect_method, type = "response")
@@ -692,7 +692,7 @@ sample_level_fig <- mod9_cld %>%
 ```
 
 
-```{r composite_fig_1, echo = F}
+```{r composite_fig_1, echo = F, cache = F}
 
 plot_grid(study_level_fig,
           sample_level_fig,
@@ -787,6 +787,9 @@ study_odds <- emmeans(study_mod2, ~ detect_method | organism,
 
 contr_study <- contrast(study_odds, method = "pairwise")
 
+
+
+
 summary(contr_study, infer = TRUE) %>% 
   as.data.frame() %>% 
   bind_rows(., study_overall) %>% 
@@ -806,8 +809,8 @@ summary(contr_study, infer = TRUE) %>%
                 label = star),
             hjust = -1) +
   coord_flip() +
-  theme_minimal() +
-  labs(x = NULL, y = "Log Odds") +
+  theme_minimal(base_size = 18) +
+  labs(x = NULL, y = "log odds") +
   geom_hline(aes(yintercept = 0), 
              linetype = 2, alpha = 0.5)
 
@@ -835,6 +838,9 @@ sample_odds <- emmeans(mod9, ~ detect_method | organism,
                 type = "link")
 
 contr_sample <- contrast(sample_odds, method = "pairwise")
+
+
+
 
 summary(contr_sample, infer = TRUE) %>% 
   as.data.frame() %>% 
@@ -864,8 +870,103 @@ summary(contr_sample, infer = TRUE) %>%
   
 ```
 
+```{r log_odds_figure, echo = F, fig.width=6, fig.height=9}
+
+paper_odds_data <- summary(contr_study, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., study_overall) %>% 
+  mutate(star = case_when(
+    p.value <= 0.05 ~ "*",
+    TRUE ~ " "),
+    organism = factor(organism, levels = c(
+      "Arthropod", "Reptile", "Mammal",
+      "Crustacean", "Amphibian", "Fish",
+      "Mollusc", "Overall"
+    )))
+
+paper_odds <- paper_odds_data %>% 
+  ggplot(aes(x = organism, y = estimate)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0) +
+  geom_text(aes(x = organism, y = asymp.UCL,
+                label = star),
+            hjust = -1) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0), 
+             linetype = 2, alpha = 0.5) +
+  labs(x = NULL, y = NULL)
 
 
+
+
+sample_odds_data <- summary(contr_sample, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., sample_overall) %>% 
+  mutate(star = case_when(
+    p.value <= 0.05 ~ "*",
+    TRUE ~ " "),
+    organism = factor(organism, levels = c(
+      "Arthropod", "Reptile", "Mammal",
+      "Crustacean", "Amphibian", "Fish",
+      "Mollusc", "Overall"
+    )))
+
+sample_odds <- sample_odds_data %>% 
+  ggplot(aes(x = organism, y = estimate)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0) +
+  geom_text(aes(x = organism, y = asymp.UCL,
+                label = star),
+            hjust = -1) +
+  coord_flip() +
+  theme_minimal(base_size = 18) +
+  geom_hline(aes(yintercept = 0), 
+             linetype = 2, alpha = 0.5) +
+  labs(x = NULL,
+       y = paste0(
+    "\u2190 eDNA better",
+    strrep(" ", 15),
+    "Traditional better \u2192"))
+
+cowplot::plot_grid(
+  paper_odds, sample_odds,
+  nrow = 2,
+  labels = c("A", "B")
+)
+
+```
+
+
+
+
+```{r results_table, echo = F}
+
+paper_level_contrasts <- summary(contr_study, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., study_overall) %>% 
+  mutate(res = paste(organism, "paper", sep = "-")) %>% 
+  column_to_rownames("res") %>%
+  select(-contrast, -SE, -df, -organism) 
+
+
+sample_level_contrasts <- summary(contr_sample, infer = TRUE) %>% 
+  as.data.frame() %>% 
+  bind_rows(., sample_overall) %>% 
+  mutate(res = paste(organism, "sample", sep = "_")) %>% 
+  column_to_rownames("res") %>%
+  select(-contrast, -SE, -df, -organism) 
+
+
+bind_rows(paper_level_contrasts, sample_level_contrasts) %>% 
+  t() %>% as.data.frame() %>% 
+  select(sort(names(.))) %>% 
+  round(., 2) %>% 
+  write.csv(, file = "data/contrast_results.csv")
+
+```
 
 
 ```{r, echo = F}

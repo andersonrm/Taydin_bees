@@ -1,7 +1,7 @@
 Detection Methods Meta-analysis
 ================
 Dr. Riley M. Anderson & Taydin Macon
-November 20, 2025
+December 05, 2025
 
   
 
@@ -475,6 +475,8 @@ mirrors that of a multilevel random-effects meta-analysis.
 ## Log-odds sample level
 
 ![](Detection_meta_Taydin_files/figure-gfm/log_odds_sample_level-1.png)<!-- -->
+
+![](Detection_meta_Taydin_files/figure-gfm/log_odds_figure-1.png)<!-- -->
 
 ## Session Information
 
