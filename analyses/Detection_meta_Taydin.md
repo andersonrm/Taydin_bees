@@ -1,7 +1,7 @@
 Detection Methods Meta-analysis
 ================
 Dr. Riley M. Anderson & Taydin Macon
-January 15, 2026
+February 24, 2026
 
   
 
@@ -58,8 +58,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##     detect_method | study)
     ## Data: d1
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1976.0   2000.7   -982.0   1964.0      450 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1976.0    2000.7    -982.0    1964.0       450 
     ## 
     ## Random effects:
     ## 
@@ -82,8 +82,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##     (1 | paper) + (1 + detect_method | study)
     ## Data: d1
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1848.6   1931.0   -904.3   1808.6      436 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1848.6    1931.0    -904.3    1808.6       436 
     ## 
     ## Random effects:
     ## 
@@ -153,7 +153,7 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##  simulated
     ## 
     ## data:  simulationOutput
-    ## dispersion = 1.1966, p-value = 0.312
+    ## dispersion = 1.199, p-value = 0.304
     ## alternative hypothesis: two.sided
 
 ## Study-level main figure:
@@ -164,8 +164,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##     (1 | paper) + (1 + detect_method | study)
     ## Data: d1
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1848.6   1931.0   -904.3   1808.6      436 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1848.6    1931.0    -904.3    1808.6       436 
     ## 
     ## Random effects:
     ## 
@@ -230,8 +230,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## cbind(detections, misses) ~ detect_method + (1 | paper) + (1 |      study)
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   2320.1   2332.5  -1156.0   2312.1      160 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    2320.1    2332.5   -1156.0    2312.1       160 
     ## 
     ## Random effects:
     ## 
@@ -271,8 +271,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##     (1 | paper) + (1 + detect_method | study)
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1280.9   1342.9   -620.4   1240.9      144 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1280.9    1342.9    -620.4    1240.9       144 
     ## 
     ## Random effects:
     ## 
@@ -341,7 +341,7 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## 
     ## organism = Mammal:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -2.218 1.081 Inf  -2.051  0.0403
+    ##  Traditional - eDNA   -2.218 1.080 Inf  -2.051  0.0403
     ## 
     ## organism = Mollusc:
     ##  contrast           estimate    SE  df z.ratio p.value
@@ -349,7 +349,7 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## 
     ## organism = Reptile:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -0.232 1.065 Inf  -0.218  0.8275
+    ##  Traditional - eDNA   -0.232 1.060 Inf  -0.218  0.8275
     ## 
     ## Results are given on the log odds ratio (not the response) scale.
 
@@ -359,8 +359,8 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##     (1 | paper) + (1 + detect_method | study)
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1280.9   1342.9   -620.4   1240.9      144 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1280.9    1342.9    -620.4    1240.9       144 
     ## 
     ## Random effects:
     ## 
@@ -419,7 +419,7 @@ mirrors that of a multilevel random-effects meta-analysis.
 ![](Detection_meta_Taydin_files/figure-gfm/pred_fig_mod9-3.png)<!-- -->
 
     ##  contrast           odds.ratio         SE  df null z.ratio p.value
-    ##  Traditional / eDNA  0.7980421 0.03342705 Inf    1  -5.386  <.0001
+    ##  Traditional / eDNA  0.7980421 0.03342705 Inf    1  -5.386 <0.0001
     ## 
     ## Tests are performed on the log odds ratio scale
 
@@ -427,13 +427,17 @@ mirrors that of a multilevel random-effects meta-analysis.
 
 ![](Detection_meta_Taydin_files/figure-gfm/composite_fig_1-1.png)<!-- -->
 
+- **A** is the study-level figure, **B** is the sample-level figure. ^^
+
+<!-- -->
+
     ##  Family: binomial  ( logit )
     ## Formula:          
     ## cbind(detections, misses) ~ Methods * organism + (1 | paper) +      (1 | study)
     ## Data: d1_trad
     ## 
-    ##      AIC      BIC   logLik deviance df.resid 
-    ##   1175.0   1223.0   -573.5   1147.0      214 
+    ##       AIC       BIC    logLik -2*log(L)  df.resid 
+    ##    1175.0    1223.0    -573.5    1147.0       214 
     ## 
     ## Random effects:
     ## 
@@ -480,11 +484,12 @@ mirrors that of a multilevel random-effects meta-analysis.
 
 ## Session Information
 
-    R version 4.2.3 (2023-03-15 ucrt)
-    Platform: x86_64-w64-mingw32/x64 (64-bit)
-    Running under: Windows 10 x64 (build 26100)
+    R version 4.5.2 (2025-10-31 ucrt)
+    Platform: x86_64-w64-mingw32/x64
+    Running under: Windows 11 x64 (build 26200)
 
     Matrix products: default
+      LAPACK version 3.12.1
 
     locale:
     [1] LC_COLLATE=English_United States.utf8 
@@ -493,32 +498,40 @@ mirrors that of a multilevel random-effects meta-analysis.
     [4] LC_NUMERIC=C                          
     [5] LC_TIME=English_United States.utf8    
 
+    time zone: America/New_York
+    tzcode source: internal
+
     attached base packages:
     [1] stats     graphics  grDevices utils     datasets  methods   base     
 
     other attached packages:
-     [1] cowplot_1.1.3       lubridate_1.9.3     forcats_1.0.0      
-     [4] stringr_1.5.1       dplyr_1.1.4         purrr_1.0.2        
-     [7] readr_2.1.5         tidyr_1.3.1         tibble_3.2.1       
-    [10] ggplot2_3.5.1       tidyverse_2.0.0     multcomp_1.4-25    
-    [13] TH.data_1.1-2       MASS_7.3-58.2       survival_3.5-3     
-    [16] mvtnorm_1.2-5       emmeans_1.10.2      DHARMa_0.4.7       
-    [19] sjPlot_2.8.16       glmmTMB_1.1.9       metafor_4.8-0      
-    [22] numDeriv_2016.8-1.1 metadat_1.4-0       Matrix_1.5-3       
+     [1] multcompView_0.1-11 cowplot_1.2.0       lubridate_1.9.4    
+     [4] forcats_1.0.1       stringr_1.6.0       dplyr_1.1.4        
+     [7] purrr_1.2.1         readr_2.1.6         tidyr_1.3.2        
+    [10] tibble_3.3.1        ggplot2_4.0.2       tidyverse_2.0.0    
+    [13] multcomp_1.4-29     TH.data_1.1-5       MASS_7.3-65        
+    [16] survival_3.8-3      mvtnorm_1.3-3       emmeans_2.0.1      
+    [19] DHARMa_0.4.7        sjPlot_2.9.0        glmmTMB_1.1.14     
+    [22] metafor_4.8-0       numDeriv_2016.8-1.1 metadat_1.4-0      
+    [25] Matrix_1.7-4       
 
     loaded via a namespace (and not attached):
-     [1] Rcpp_1.0.12        lattice_0.20-45    zoo_1.8-12         rprojroot_2.0.4   
-     [5] digest_0.6.35      utf8_1.2.4         R6_2.5.1           evaluate_0.24.0   
-     [9] coda_0.19-4.1      pillar_1.9.0       rlang_1.1.4        rstudioapi_0.16.0 
-    [13] minqa_1.2.7        performance_0.12.0 nloptr_2.0.3       rmarkdown_2.27    
-    [17] mathjaxr_1.8-0     ggeffects_1.6.0    splines_4.2.3      lme4_1.1-35.3     
-    [21] TMB_1.9.11         munsell_0.5.1      compiler_4.2.3     xfun_0.44         
-    [25] pkgconfig_2.0.3    mgcv_1.8-42        htmltools_0.5.8.1  insight_1.0.1     
-    [29] tidyselect_1.2.1   codetools_0.2-19   fansi_1.0.6        tzdb_0.4.0        
-    [33] withr_3.0.0        sjmisc_2.8.10      grid_4.2.3         nlme_3.1-162      
-    [37] xtable_1.8-4       gtable_0.3.5       lifecycle_1.0.4    magrittr_2.0.3    
-    [41] scales_1.3.0       datawizard_0.11.0  stringi_1.8.4      estimability_1.5.1
-    [45] cli_3.6.2          vctrs_0.6.5        generics_0.1.3     boot_1.3-28.1     
-    [49] sandwich_3.1-0     sjlabelled_1.2.0   tools_4.2.3        glue_1.7.0        
-    [53] hms_1.1.3          sjstats_0.19.0     fastmap_1.2.0      yaml_2.3.8        
-    [57] timechange_0.3.0   colorspace_2.1-0   knitr_1.47        
+     [1] sjlabelled_1.2.0   tidyselect_1.2.1   farver_2.1.2       S7_0.2.1          
+     [5] fastmap_1.2.0      mathjaxr_2.0-0     promises_1.5.0     digest_0.6.39     
+     [9] mime_0.13          estimability_1.5.1 timechange_0.4.0   lifecycle_1.0.5   
+    [13] magrittr_2.0.4     compiler_4.5.2     rlang_1.1.7        tools_4.5.2       
+    [17] yaml_2.3.12        knitr_1.51         labeling_0.4.3     plyr_1.8.9        
+    [21] RColorBrewer_1.1-3 gap.datasets_0.0.6 withr_3.0.2        datawizard_1.3.0  
+    [25] grid_4.5.2         xtable_1.8-8       scales_1.4.0       iterators_1.0.14  
+    [29] insight_1.4.6      cli_3.6.5          rmarkdown_2.30     reformulas_0.4.4  
+    [33] generics_0.1.4     otel_0.2.0         rstudioapi_0.18.0  tzdb_0.5.0        
+    [37] minqa_1.2.8        splines_4.5.2      parallel_4.5.2     vctrs_0.7.1       
+    [41] boot_1.3-32        sandwich_3.1-1     hms_1.1.4          qgam_2.0.0        
+    [45] foreach_1.5.2      gap_1.14           glue_1.8.0         nloptr_2.2.1      
+    [49] codetools_0.2-20   stringi_1.8.7      gtable_0.3.6       later_1.4.7       
+    [53] ggeffects_2.3.2    lme4_1.1-38        pillar_1.11.1      htmltools_0.5.9   
+    [57] R6_2.6.1           TMB_1.9.19         Rdpack_2.6.5       doParallel_1.0.17 
+    [61] rprojroot_2.1.1    shiny_1.13.0       evaluate_1.0.5     lattice_0.22-7    
+    [65] haven_2.5.5        rbibutils_2.4.1    httpuv_1.6.16      Rcpp_1.1.1        
+    [69] coda_0.19-4.1      nlme_3.1-168       mgcv_1.9-3         xfun_0.56         
+    [73] sjmisc_2.8.11      zoo_1.8-15         pkgconfig_2.0.3   

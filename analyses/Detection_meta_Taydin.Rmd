@@ -434,7 +434,7 @@ study_level_fig <- mod2_cld %>%
                 jitter.height = 0.01,
                 dodge.width = 0.5),
              show.legend = F,
-             shape = 21, alpha = 0.3) +
+             shape = 21, alpha = 0.3, size = 1) +
     theme(legend.position = NULL)
 
 ```
@@ -689,7 +689,7 @@ sample_level_fig <- mod9_cld %>%
                 jitter.width = 0.2,
                 jitter.height = 0.01,
                 dodge.width = 0.5),
-              shape = 21, alpha = 0.3) +
+              shape = 21, alpha = 0.3, size = 1) +
     theme(legend.position = "bottom",
         legend.title.position = "top",
         legend.title = element_text(hjust = .5),
@@ -707,7 +707,7 @@ plot_grid(study_level_fig,
 
 ```
 
-
+* **A** is the study-level figure, **B** is the sample-level figure. ^^
 
 
 ```{r active_passive_sampling, echo = F}
@@ -965,11 +965,11 @@ sample_level_contrasts <- summary(contr_sample, infer = TRUE) %>%
   select(-contrast, -SE, -df, -organism) 
 
 
-bind_rows(paper_level_contrasts, sample_level_contrasts) %>% 
-  t() %>% as.data.frame() %>% 
-  select(sort(names(.))) %>% 
-  round(., 2) %>% 
-  write.csv(, file = "data/contrast_results.csv")
+# bind_rows(paper_level_contrasts, sample_level_contrasts) %>% 
+#   t() %>% as.data.frame() %>% 
+#   select(sort(names(.))) %>% 
+#   round(., 2) %>% 
+#   write.csv(, file = "data/contrast_results.csv")
 
 ```
 
