@@ -616,10 +616,11 @@ mod9_cld %>%
   
 ```
 
-```{r pred_fig_mod9_with_raw, echo = F, fig.width = 9, fig.height=5, cache=F}
+```{r pred_fig_mod9_with_raw, echo = F, fig.width = 9, fig.height=5, cache=FALSE}
 
 
 mod4_emm <- emmeans(mod4, ~ detect_method, type = "response")
+
 pairs(mod4_emm) %>% 
   as.data.frame()
 
