@@ -69,7 +69,7 @@ library(emmeans)
 library(multcomp)
 library(tidyverse) # Needed for data wrangling: dplyr, tidyr, ggplot2
 library(cowplot)
-
+library(multcompView)
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @@@@@ Data Preparation
