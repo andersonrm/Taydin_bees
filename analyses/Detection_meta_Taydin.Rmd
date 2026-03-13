@@ -4,14 +4,14 @@ author: "Dr. Riley M. Anderson & Taydin Macon"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 graphics: yes
 output:
-  github_document:
-    toc: yes
-    toc_depth: 5
-    pandoc_args: --webtex
   html_document:
     keep_md: yes
     theme: readable
     mathjax: default
+  github_document:
+    toc: yes
+    toc_depth: 5
+    pandoc_args: --webtex
   html_notebook:
     code_folding: hide
     theme: readable
@@ -699,9 +699,15 @@ sample_level_fig <- mod9_cld %>%
 
 ```{r composite_fig_1, echo = F, cache = F, fig.width=9, fig.height=8}
 
+study_level_fig <- study_level_fig +
+  theme(plot.margin = margin(t = 20, r = 5, b = 5, l = 5))
+
+sample_level_fig <- sample_level_fig +
+  theme(plot.margin = margin(t = 20, r = 5, b = 5, l = 5))
+
 plot_grid(study_level_fig,
           sample_level_fig,
-          labels = c("A", "B"),
+          labels = c("Site Detections", "Sample detections"),
           ncol = 1,
           rel_heights = c(.85, 1.25))
 
@@ -727,12 +733,12 @@ summary(trad_mod1)
 plot_model(trad_mod1,
            type = "pred",
            terms = c("organism", "Methods"))+ 
-  labs(x = "Organism", y = "Pr(detection)",
-       color = NULL) 
+  labs(x = "Organism", y = "Predicted Probabilities for Active vs. Passive Traditional Sampling",
+       color = NULL, title = "") 
 
 ```
 
-# Log odds for study level analysis - Taydin is still working on this. 
+# Log odds for study level analysis  
 ```{r meta_analysis_data_prep, echo = F, eval = F}
 
 # tried this but not worth it. Converting the GLMM estimates to log odds avoids introducing arbitrary continuity corrections.
@@ -770,7 +776,7 @@ summary(study_meta1)
 
 # Log odds
 
-## Log odds study level
+## Log odds study (site) level
 
 ```{r log_odds_study_level, echo = F}
 
@@ -936,10 +942,17 @@ sample_odds <- sample_odds_data %>%
     strrep(" ", 15),
     "Traditional better \u2192"))
 
+paper_odds <- paper_odds +
+  theme(plot.margin = margin(t = 20, r = 5, b = 5, l = 5))
+
+sample_odds <- sample_odds +
+  theme(plot.margin = margin(t = 20, r = 5, b = 5, l = 5))
+
 cowplot::plot_grid(
   paper_odds, sample_odds,
   nrow = 2,
-  labels = c("A", "B")
+  labels = c("Site Detections", "Sample detections"),
+  label_y = 1.01
 )
 
 ```
