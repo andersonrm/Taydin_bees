@@ -808,7 +808,7 @@ summary(contr_study, infer = TRUE) %>%
     p.value <= 0.05 ~ "*",
     TRUE ~ " "),
     organism = factor(organism, levels = c(
-      "Arthropod", "Reptile", "Mammal",
+      "Insect", "Reptile", "Mammal",
       "Crustacean", "Amphibian", "Fish",
       "Mollusc", "Overall"
     ))) %>% 
@@ -860,7 +860,7 @@ summary(contr_sample, infer = TRUE) %>%
     p.value <= 0.05 ~ "*",
     TRUE ~ " "),
     organism = factor(organism, levels = c(
-      "Arthropod", "Reptile", "Mammal",
+      "Insect", "Reptile", "Mammal",
       "Crustacean", "Amphibian", "Fish",
       "Mollusc", "Overall"
     ))) %>% 
@@ -890,7 +890,7 @@ paper_odds_data <- summary(contr_study, infer = TRUE) %>%
     p.value <= 0.05 ~ "*",
     TRUE ~ " "),
     organism = factor(organism, levels = c(
-      "Arthropod", "Reptile", "Mammal",
+      "Insect", "Reptile", "Mammal",
       "Crustacean", "Amphibian", "Fish",
       "Mollusc", "Overall"
     )))
@@ -919,7 +919,7 @@ sample_odds_data <- summary(contr_sample, infer = TRUE) %>%
     p.value <= 0.05 ~ "*",
     TRUE ~ " "),
     organism = factor(organism, levels = c(
-      "Arthropod", "Reptile", "Mammal",
+      "Insect", "Reptile", "Mammal",
       "Crustacean", "Amphibian", "Fish",
       "Mollusc", "Overall"
     )))
