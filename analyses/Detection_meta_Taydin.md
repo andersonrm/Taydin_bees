@@ -1,7 +1,7 @@
 Detection Methods Meta-analysis
 ================
 Dr. Riley M. Anderson & Taydin Macon
-February 24, 2026
+March 30, 2026
 
   
 
@@ -11,10 +11,10 @@ February 24, 2026
   - [Study-level analysis](#study-level-analysis)
   - [Study-level main figure:](#study-level-main-figure)
   - [Sample-level analysis:](#sample-level-analysis)
-- [Log odds for study level analysis - Taydin is still working on
-  this.](#log-odds-for-study-level-analysis---taydin-is-still-working-on-this)
+- [Log odds for study level
+  analysis](#log-odds-for-study-level-analysis)
 - [Log odds](#log-odds)
-  - [Log odds study level](#log-odds-study-level)
+  - [Log odds study (site) level](#log-odds-study-site-level)
   - [Log-odds sample level](#log-odds-sample-level)
   - [Session Information](#session-information)
 
@@ -46,10 +46,10 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## MODEL2:     study), zi=~0, disp=~1
     ## MODEL3: cbind(detections, misses) ~ detect_method + (1 | paper) + (1 + , zi=~0, disp=~1
     ## MODEL3:     detect_method | study), zi=~0, disp=~1
-    ##        Df    AIC    BIC   logLik deviance  Chisq Chi Df Pr(>Chisq)    
-    ## MODEL1  4 2986.1 3002.6 -1489.03   2978.1                             
-    ## MODEL2  4 2986.1 3002.6 -1489.03   2978.1    0.0      0          1    
-    ## MODEL3  6 1976.0 2000.7  -981.99   1964.0 1014.1      2     <2e-16 ***
+    ##        Df    AIC    BIC  logLik deviance Chisq Chi Df Pr(>Chisq)    
+    ## MODEL1  4 1653.7 1667.4 -822.83   1645.7                            
+    ## MODEL2  4 1653.7 1667.4 -822.83   1645.7   0.0      0          1    
+    ## MODEL3  6 1240.4 1260.9 -614.18   1228.4 417.3      2     <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ##  Family: binomial  ( logit )
@@ -59,21 +59,21 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: d1
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1976.0    2000.7    -982.0    1964.0       450 
+    ##    1240.4    1260.9    -614.2    1228.4       222 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
     ##  Groups Name              Variance Std.Dev. Corr  
-    ##  paper  (Intercept)       2.528    1.590          
-    ##  study  (Intercept)       7.690    2.773          
-    ##         detect_methodeDNA 8.653    2.942    -0.90 
-    ## Number of obs: 456, groups:  paper, 30; study, 228
+    ##  paper  (Intercept)       0.6068   0.779          
+    ##  study  (Intercept)       1.9521   1.397          
+    ##         detect_methodeDNA 2.7055   1.645    -0.28 
+    ## Number of obs: 228, groups:  paper, 33; study, 114
     ## 
     ## Conditional model:
     ##                   Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)         1.1639     0.3916   2.972 0.002960 ** 
-    ## detect_methodeDNA  -0.9330     0.2510  -3.718 0.000201 ***
+    ## (Intercept)         0.1743     0.2257   0.772     0.44    
+    ## detect_methodeDNA   0.7546     0.1879   4.015 5.94e-05 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ##  Family: binomial  ( logit )
@@ -83,52 +83,52 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: d1
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1848.6    1931.0    -904.3    1808.6       436 
+    ##    1241.5    1310.1    -600.8    1201.5       208 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
-    ##  Groups Name              Variance  Std.Dev.  Corr  
-    ##  paper  (Intercept)       1.213e-09 3.483e-05       
-    ##  study  (Intercept)       3.295e+00 1.815e+00       
-    ##         detect_methodeDNA 3.939e+00 1.985e+00 -0.47 
-    ## Number of obs: 456, groups:  paper, 30; study, 228
+    ##  Groups Name              Variance Std.Dev. Corr  
+    ##  paper  (Intercept)       0.3347   0.5785         
+    ##  study  (Intercept)       1.8550   1.3620         
+    ##         detect_methodeDNA 2.2815   1.5105   -0.31 
+    ## Number of obs: 228, groups:  paper, 33; study, 114
     ## 
     ## Conditional model:
     ##                                          Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept)                               -0.6620     0.2929  -2.260  0.02380
-    ## detect_methodeDNA                          1.1134     0.3360   3.314  0.00092
-    ## organismArthropod                         -0.6331     0.3547  -1.785  0.07425
-    ## organismCrustacean                         0.6978     0.9898   0.705  0.48084
-    ## organismFish                               0.9258     0.4714   1.964  0.04951
-    ## organismMammal                             1.9160     1.3744   1.394  0.16330
-    ## organismMollusc                           -0.6493     0.7914  -0.820  0.41197
-    ## organismReptile                           -0.4220     1.0346  -0.408  0.68336
-    ## detect_methodeDNA:organismArthropod       -5.1515     0.5167  -9.971  < 2e-16
-    ## detect_methodeDNA:organismCrustacean      -0.7404     1.1286  -0.656  0.51181
-    ## detect_methodeDNA:organismFish             0.4068     0.5590   0.728  0.46680
-    ## detect_methodeDNA:organismMammal          -1.3624     1.5344  -0.888  0.37459
-    ## detect_methodeDNA:organismMollusc          1.3918     0.9765   1.425  0.15404
-    ## detect_methodeDNA:organismReptile         -1.6174     1.2064  -1.341  0.18003
-    ## detect_methodTraditional:scale(pub_year)  -0.3579     0.1408  -2.542  0.01101
-    ## detect_methodeDNA:scale(pub_year)         -0.7512     0.1558  -4.823 1.42e-06
-    ##                                             
-    ## (Intercept)                              *  
-    ## detect_methodeDNA                        ***
-    ## organismArthropod                        .  
-    ## organismCrustacean                          
-    ## organismFish                             *  
-    ## organismMammal                              
-    ## organismMollusc                             
-    ## organismReptile                             
-    ## detect_methodeDNA:organismArthropod      ***
-    ## detect_methodeDNA:organismCrustacean        
-    ## detect_methodeDNA:organismFish              
-    ## detect_methodeDNA:organismMammal            
-    ## detect_methodeDNA:organismMollusc           
-    ## detect_methodeDNA:organismReptile           
-    ## detect_methodTraditional:scale(pub_year) *  
-    ## detect_methodeDNA:scale(pub_year)        ***
+    ## (Intercept)                              -0.06454    0.33020  -0.196  0.84504
+    ## detect_methodeDNA                         0.71923    0.25239   2.850  0.00438
+    ## organismCrustacean                        0.57915    0.76055   0.761  0.44636
+    ## organismFish                              0.53247    0.46181   1.153  0.24891
+    ## organismInsect                           -0.42083    0.79073  -0.532  0.59458
+    ## organismMammal                            1.10354    1.26678   0.871  0.38368
+    ## organismMollusc                          -1.44587    0.76665  -1.886  0.05930
+    ## organismReptile                          -0.69716    0.90230  -0.773  0.43973
+    ## detect_methodeDNA:organismCrustacean     -0.47007    0.76907  -0.611  0.54105
+    ## detect_methodeDNA:organismFish            0.51904    0.45170   1.149  0.25052
+    ## detect_methodeDNA:organismInsect         -1.13171    0.80556  -1.405  0.16006
+    ## detect_methodeDNA:organismMammal         -1.35876    1.21039  -1.123  0.26162
+    ## detect_methodeDNA:organismMollusc         1.43112    0.77768   1.840  0.06573
+    ## detect_methodeDNA:organismReptile        -1.17224    0.98008  -1.196  0.23167
+    ## detect_methodTraditional:scale(pub_year) -0.36928    0.22371  -1.651  0.09880
+    ## detect_methodeDNA:scale(pub_year)        -0.64284    0.25262  -2.545  0.01094
+    ##                                            
+    ## (Intercept)                                
+    ## detect_methodeDNA                        **
+    ## organismCrustacean                         
+    ## organismFish                               
+    ## organismInsect                             
+    ## organismMammal                             
+    ## organismMollusc                          . 
+    ## organismReptile                            
+    ## detect_methodeDNA:organismCrustacean       
+    ## detect_methodeDNA:organismFish             
+    ## detect_methodeDNA:organismInsect           
+    ## detect_methodeDNA:organismMammal           
+    ## detect_methodeDNA:organismMollusc        . 
+    ## detect_methodeDNA:organismReptile          
+    ## detect_methodTraditional:scale(pub_year) . 
+    ## detect_methodeDNA:scale(pub_year)        * 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## Data: d1
@@ -139,12 +139,10 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## study_mod2:     (1 | paper) + (1 + detect_method | study), zi=~0, disp=~1
     ## study_mod4: cbind(detections, misses) ~ detect_method * organism + scale(pub_year):detect_method + , zi=~0, disp=~1
     ## study_mod4:     col_method_edna + (1 | paper) + (1 + detect_method | study), zi=~0, disp=~1
-    ##            Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)   
-    ## study_mod3 19 1852.1 1930.4 -907.04   1814.1                            
-    ## study_mod2 20 1848.6 1931.0 -904.29   1808.6 5.5041      1   0.018971 * 
-    ## study_mod4 21 1843.2 1929.8 -900.59   1801.2 7.4127      1   0.006477 **
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ##            Df    AIC    BIC  logLik deviance  Chisq Chi Df Pr(>Chisq)
+    ## study_mod3 19 1241.3 1306.5 -601.67   1203.3                         
+    ## study_mod2 20 1241.5 1310.1 -600.77   1201.5 1.8029      1     0.1794
+    ## study_mod4 20 1241.5 1310.1 -600.77   1201.5 0.0000      0     1.0000
 
 ![](Detection_meta_Taydin_files/figure-gfm/GLMM-1.png)<!-- -->![](Detection_meta_Taydin_files/figure-gfm/GLMM-2.png)<!-- -->
 
@@ -153,7 +151,7 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##  simulated
     ## 
     ## data:  simulationOutput
-    ## dispersion = 1.199, p-value = 0.304
+    ## dispersion = 1.2509, p-value = 0.24
     ## alternative hypothesis: two.sided
 
 ## Study-level main figure:
@@ -165,52 +163,52 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: d1
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1848.6    1931.0    -904.3    1808.6       436 
+    ##    1241.5    1310.1    -600.8    1201.5       208 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
-    ##  Groups Name              Variance  Std.Dev.  Corr  
-    ##  paper  (Intercept)       1.213e-09 3.483e-05       
-    ##  study  (Intercept)       3.295e+00 1.815e+00       
-    ##         detect_methodeDNA 3.939e+00 1.985e+00 -0.47 
-    ## Number of obs: 456, groups:  paper, 30; study, 228
+    ##  Groups Name              Variance Std.Dev. Corr  
+    ##  paper  (Intercept)       0.3347   0.5785         
+    ##  study  (Intercept)       1.8550   1.3620         
+    ##         detect_methodeDNA 2.2815   1.5105   -0.31 
+    ## Number of obs: 228, groups:  paper, 33; study, 114
     ## 
     ## Conditional model:
     ##                                          Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept)                               -0.6620     0.2929  -2.260  0.02380
-    ## detect_methodeDNA                          1.1134     0.3360   3.314  0.00092
-    ## organismArthropod                         -0.6331     0.3547  -1.785  0.07425
-    ## organismCrustacean                         0.6978     0.9898   0.705  0.48084
-    ## organismFish                               0.9258     0.4714   1.964  0.04951
-    ## organismMammal                             1.9160     1.3744   1.394  0.16330
-    ## organismMollusc                           -0.6493     0.7914  -0.820  0.41197
-    ## organismReptile                           -0.4220     1.0346  -0.408  0.68336
-    ## detect_methodeDNA:organismArthropod       -5.1515     0.5167  -9.971  < 2e-16
-    ## detect_methodeDNA:organismCrustacean      -0.7404     1.1286  -0.656  0.51181
-    ## detect_methodeDNA:organismFish             0.4068     0.5590   0.728  0.46680
-    ## detect_methodeDNA:organismMammal          -1.3624     1.5344  -0.888  0.37459
-    ## detect_methodeDNA:organismMollusc          1.3918     0.9765   1.425  0.15404
-    ## detect_methodeDNA:organismReptile         -1.6174     1.2064  -1.341  0.18003
-    ## detect_methodTraditional:scale(pub_year)  -0.3579     0.1408  -2.542  0.01101
-    ## detect_methodeDNA:scale(pub_year)         -0.7512     0.1558  -4.823 1.42e-06
-    ##                                             
-    ## (Intercept)                              *  
-    ## detect_methodeDNA                        ***
-    ## organismArthropod                        .  
-    ## organismCrustacean                          
-    ## organismFish                             *  
-    ## organismMammal                              
-    ## organismMollusc                             
-    ## organismReptile                             
-    ## detect_methodeDNA:organismArthropod      ***
-    ## detect_methodeDNA:organismCrustacean        
-    ## detect_methodeDNA:organismFish              
-    ## detect_methodeDNA:organismMammal            
-    ## detect_methodeDNA:organismMollusc           
-    ## detect_methodeDNA:organismReptile           
-    ## detect_methodTraditional:scale(pub_year) *  
-    ## detect_methodeDNA:scale(pub_year)        ***
+    ## (Intercept)                              -0.06454    0.33020  -0.196  0.84504
+    ## detect_methodeDNA                         0.71923    0.25239   2.850  0.00438
+    ## organismCrustacean                        0.57915    0.76055   0.761  0.44636
+    ## organismFish                              0.53247    0.46181   1.153  0.24891
+    ## organismInsect                           -0.42083    0.79073  -0.532  0.59458
+    ## organismMammal                            1.10354    1.26678   0.871  0.38368
+    ## organismMollusc                          -1.44587    0.76665  -1.886  0.05930
+    ## organismReptile                          -0.69716    0.90230  -0.773  0.43973
+    ## detect_methodeDNA:organismCrustacean     -0.47007    0.76907  -0.611  0.54105
+    ## detect_methodeDNA:organismFish            0.51904    0.45170   1.149  0.25052
+    ## detect_methodeDNA:organismInsect         -1.13171    0.80556  -1.405  0.16006
+    ## detect_methodeDNA:organismMammal         -1.35876    1.21039  -1.123  0.26162
+    ## detect_methodeDNA:organismMollusc         1.43112    0.77768   1.840  0.06573
+    ## detect_methodeDNA:organismReptile        -1.17224    0.98008  -1.196  0.23167
+    ## detect_methodTraditional:scale(pub_year) -0.36928    0.22371  -1.651  0.09880
+    ## detect_methodeDNA:scale(pub_year)        -0.64284    0.25262  -2.545  0.01094
+    ##                                            
+    ## (Intercept)                                
+    ## detect_methodeDNA                        **
+    ## organismCrustacean                         
+    ## organismFish                               
+    ## organismInsect                             
+    ## organismMammal                             
+    ## organismMollusc                          . 
+    ## organismReptile                            
+    ## detect_methodeDNA:organismCrustacean       
+    ## detect_methodeDNA:organismFish             
+    ## detect_methodeDNA:organismInsect           
+    ## detect_methodeDNA:organismMammal           
+    ## detect_methodeDNA:organismMollusc        . 
+    ## detect_methodeDNA:organismReptile          
+    ## detect_methodTraditional:scale(pub_year) . 
+    ## detect_methodeDNA:scale(pub_year)        * 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## [[1]]
@@ -231,30 +229,30 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    2320.1    2332.5   -1156.0    2312.1       160 
+    ##    2210.2    2222.4   -1101.1    2202.2       154 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
     ##  Groups Name        Variance Std.Dev.
-    ##  paper  (Intercept) 0.7292   0.8539  
-    ##  study  (Intercept) 2.1895   1.4797  
-    ## Number of obs: 164, groups:  paper, 24; study, 82
+    ##  paper  (Intercept) 0.7847   0.8858  
+    ##  study  (Intercept) 2.2736   1.5078  
+    ## Number of obs: 158, groups:  paper, 22; study, 79
     ## 
     ## Conditional model:
     ##                   Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept)       -0.63542    0.28705  -2.214   0.0269 *  
-    ## detect_methodeDNA  0.22559    0.04189   5.386 7.21e-08 ***
+    ## (Intercept)       -0.65675    0.30548  -2.150   0.0316 *  
+    ## detect_methodeDNA  0.26061    0.04287   6.079 1.21e-09 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## Overdispersion ratio for model: mod9 
     ## formula: cbind(detections, misses) ~ detect_method * organism + scale(pub_year):detect_method + (1 | paper) + (1 + detect_method | study) 
     ## 
     ## Acceptable range: 1 - 1.4
-    ## Overdispersion ratio: 0.188  df: 144  p = 1 
+    ## Overdispersion ratio: 0.19  df: 138  p = 1 
     ##  Data are NOT OVERDISPERSED
-    ##     ratio  deviance        df    pvalue 
-    ##   0.18800  27.09426 144.00000   1.00000
+    ##    ratio deviance       df   pvalue 
+    ##   0.1900  26.1635 138.0000   1.0000
 
 ![](Detection_meta_Taydin_files/figure-gfm/models_with_new_data-1.png)<!-- -->![](Detection_meta_Taydin_files/figure-gfm/models_with_new_data-2.png)<!-- -->
 
@@ -263,7 +261,7 @@ mirrors that of a multilevel random-effects meta-analysis.
     ##  simulated
     ## 
     ## data:  simulationOutput
-    ## dispersion = 1.291, p-value = 0.528
+    ## dispersion = 0.77681, p-value = 0.72
     ## alternative hypothesis: two.sided
     ##  Family: binomial  ( logit )
     ## Formula:          
@@ -272,52 +270,52 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1280.9    1342.9    -620.4    1240.9       144 
+    ##    1228.0    1289.3    -594.0    1188.0       138 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
     ##  Groups Name              Variance Std.Dev. Corr  
-    ##  paper  (Intercept)       0.3341   0.578          
-    ##  study  (Intercept)       1.8004   1.342          
-    ##         detect_methodeDNA 2.0242   1.423    -0.10 
-    ## Number of obs: 164, groups:  paper, 24; study, 82
+    ##  paper  (Intercept)       0.3746   0.612          
+    ##  study  (Intercept)       1.8534   1.361          
+    ##         detect_methodeDNA 2.0819   1.443    -0.09 
+    ## Number of obs: 158, groups:  paper, 22; study, 79
     ## 
     ## Conditional model:
     ##                                          Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept)                              -1.26181    0.41319  -3.054 0.002259
-    ## detect_methodeDNA                         0.32289    0.25142   1.284 0.199042
-    ## organismArthropod                         0.32685    0.89392   0.366 0.714633
-    ## organismCrustacean                        1.04469    0.84111   1.242 0.214223
-    ## organismFish                              1.06932    0.53652   1.993 0.046253
-    ## organismMammal                           -0.39340    1.23374  -0.319 0.749824
-    ## organismMollusc                          -1.24425    0.82480  -1.509 0.131417
-    ## organismReptile                           0.47204    1.10540   0.427 0.669357
-    ## detect_methodeDNA:organismArthropod      -2.80911    0.84169  -3.337 0.000845
-    ## detect_methodeDNA:organismCrustacean     -1.17059    0.77978  -1.501 0.133311
-    ## detect_methodeDNA:organismFish            0.42079    0.44516   0.945 0.344522
-    ## detect_methodeDNA:organismMammal          1.89494    1.10351   1.717 0.085943
-    ## detect_methodeDNA:organismMollusc         2.13012    0.68249   3.121 0.001802
-    ## detect_methodeDNA:organismReptile        -0.09083    1.09504  -0.083 0.933891
-    ## detect_methodTraditional:scale(pub_year) -0.57218    0.23783  -2.406 0.016138
-    ## detect_methodeDNA:scale(pub_year)        -1.01088    0.28681  -3.525 0.000424
+    ## (Intercept)                              -1.22448    0.42907  -2.854 0.004320
+    ## detect_methodeDNA                         0.34300    0.25621   1.339 0.180646
+    ## organismCrustacean                        0.70474    0.96930   0.727 0.467190
+    ## organismFish                              1.17266    0.56573   2.073 0.038188
+    ## organismInsect                            0.31851    0.92090   0.346 0.729443
+    ## organismMammal                           -0.41511    1.27647  -0.325 0.745032
+    ## organismMollusc                          -1.28250    0.85216  -1.505 0.132323
+    ## organismReptile                           0.49531    1.12688   0.440 0.660271
+    ## detect_methodeDNA:organismCrustacean     -0.97256    0.91427  -1.064 0.287441
+    ## detect_methodeDNA:organismFish            0.30131    0.47407   0.636 0.525043
+    ## detect_methodeDNA:organismInsect         -2.84081    0.85798  -3.311 0.000929
+    ## detect_methodeDNA:organismMammal          1.90691    1.11848   1.705 0.088211
+    ## detect_methodeDNA:organismMollusc         2.13912    0.69281   3.088 0.002018
+    ## detect_methodeDNA:organismReptile        -0.09325    1.10923  -0.084 0.933001
+    ## detect_methodTraditional:scale(pub_year) -0.56702    0.25982  -2.182 0.029083
+    ## detect_methodeDNA:scale(pub_year)        -1.02106    0.31054  -3.288 0.001009
     ##                                             
     ## (Intercept)                              ** 
     ## detect_methodeDNA                           
-    ## organismArthropod                           
     ## organismCrustacean                          
     ## organismFish                             *  
+    ## organismInsect                              
     ## organismMammal                              
     ## organismMollusc                             
     ## organismReptile                             
-    ## detect_methodeDNA:organismArthropod      ***
     ## detect_methodeDNA:organismCrustacean        
     ## detect_methodeDNA:organismFish              
+    ## detect_methodeDNA:organismInsect         ***
     ## detect_methodeDNA:organismMammal         .  
     ## detect_methodeDNA:organismMollusc        ** 
     ## detect_methodeDNA:organismReptile           
     ## detect_methodTraditional:scale(pub_year) *  
-    ## detect_methodeDNA:scale(pub_year)        ***
+    ## detect_methodeDNA:scale(pub_year)        ** 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -325,31 +323,31 @@ mirrors that of a multilevel random-effects meta-analysis.
 
     ## organism = Amphibian:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -0.323 0.251 Inf  -1.284  0.1990
-    ## 
-    ## organism = Arthropod:
-    ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA    2.486 0.790 Inf   3.149  0.0016
+    ##  Traditional - eDNA   -0.343 0.256 Inf  -1.339  0.1806
     ## 
     ## organism = Crustacean:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA    0.848 0.735 Inf   1.153  0.2488
+    ##  Traditional - eDNA    0.630 0.870 Inf   0.724  0.4691
     ## 
     ## organism = Fish:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -0.744 0.367 Inf  -2.029  0.0425
+    ##  Traditional - eDNA   -0.644 0.396 Inf  -1.629  0.1034
+    ## 
+    ## organism = Insect:
+    ##  contrast           estimate    SE  df z.ratio p.value
+    ##  Traditional - eDNA    2.498 0.801 Inf   3.118  0.0018
     ## 
     ## organism = Mammal:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -2.218 1.080 Inf  -2.051  0.0403
+    ##  Traditional - eDNA   -2.250 1.100 Inf  -2.049  0.0405
     ## 
     ## organism = Mollusc:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -2.453 0.637 Inf  -3.850  0.0001
+    ##  Traditional - eDNA   -2.482 0.646 Inf  -3.842  0.0001
     ## 
     ## organism = Reptile:
     ##  contrast           estimate    SE  df z.ratio p.value
-    ##  Traditional - eDNA   -0.232 1.060 Inf  -0.218  0.8275
+    ##  Traditional - eDNA   -0.250 1.080 Inf  -0.232  0.8168
     ## 
     ## Results are given on the log odds ratio (not the response) scale.
 
@@ -360,52 +358,52 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: subset(d2, organism != "Hydrozoan")
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1280.9    1342.9    -620.4    1240.9       144 
+    ##    1228.0    1289.3    -594.0    1188.0       138 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
     ##  Groups Name              Variance Std.Dev. Corr  
-    ##  paper  (Intercept)       0.3341   0.578          
-    ##  study  (Intercept)       1.8004   1.342          
-    ##         detect_methodeDNA 2.0242   1.423    -0.10 
-    ## Number of obs: 164, groups:  paper, 24; study, 82
+    ##  paper  (Intercept)       0.3746   0.612          
+    ##  study  (Intercept)       1.8534   1.361          
+    ##         detect_methodeDNA 2.0819   1.443    -0.09 
+    ## Number of obs: 158, groups:  paper, 22; study, 79
     ## 
     ## Conditional model:
     ##                                          Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept)                              -1.26181    0.41319  -3.054 0.002259
-    ## detect_methodeDNA                         0.32289    0.25142   1.284 0.199042
-    ## organismArthropod                         0.32685    0.89392   0.366 0.714633
-    ## organismCrustacean                        1.04469    0.84111   1.242 0.214223
-    ## organismFish                              1.06932    0.53652   1.993 0.046253
-    ## organismMammal                           -0.39340    1.23374  -0.319 0.749824
-    ## organismMollusc                          -1.24425    0.82480  -1.509 0.131417
-    ## organismReptile                           0.47204    1.10540   0.427 0.669357
-    ## detect_methodeDNA:organismArthropod      -2.80911    0.84169  -3.337 0.000845
-    ## detect_methodeDNA:organismCrustacean     -1.17059    0.77978  -1.501 0.133311
-    ## detect_methodeDNA:organismFish            0.42079    0.44516   0.945 0.344522
-    ## detect_methodeDNA:organismMammal          1.89494    1.10351   1.717 0.085943
-    ## detect_methodeDNA:organismMollusc         2.13012    0.68249   3.121 0.001802
-    ## detect_methodeDNA:organismReptile        -0.09083    1.09504  -0.083 0.933891
-    ## detect_methodTraditional:scale(pub_year) -0.57218    0.23783  -2.406 0.016138
-    ## detect_methodeDNA:scale(pub_year)        -1.01088    0.28681  -3.525 0.000424
+    ## (Intercept)                              -1.22448    0.42907  -2.854 0.004320
+    ## detect_methodeDNA                         0.34300    0.25621   1.339 0.180646
+    ## organismCrustacean                        0.70474    0.96930   0.727 0.467190
+    ## organismFish                              1.17266    0.56573   2.073 0.038188
+    ## organismInsect                            0.31851    0.92090   0.346 0.729443
+    ## organismMammal                           -0.41511    1.27647  -0.325 0.745032
+    ## organismMollusc                          -1.28250    0.85216  -1.505 0.132323
+    ## organismReptile                           0.49531    1.12688   0.440 0.660271
+    ## detect_methodeDNA:organismCrustacean     -0.97256    0.91427  -1.064 0.287441
+    ## detect_methodeDNA:organismFish            0.30131    0.47407   0.636 0.525043
+    ## detect_methodeDNA:organismInsect         -2.84081    0.85798  -3.311 0.000929
+    ## detect_methodeDNA:organismMammal          1.90691    1.11848   1.705 0.088211
+    ## detect_methodeDNA:organismMollusc         2.13912    0.69281   3.088 0.002018
+    ## detect_methodeDNA:organismReptile        -0.09325    1.10923  -0.084 0.933001
+    ## detect_methodTraditional:scale(pub_year) -0.56702    0.25982  -2.182 0.029083
+    ## detect_methodeDNA:scale(pub_year)        -1.02106    0.31054  -3.288 0.001009
     ##                                             
     ## (Intercept)                              ** 
     ## detect_methodeDNA                           
-    ## organismArthropod                           
     ## organismCrustacean                          
     ## organismFish                             *  
+    ## organismInsect                              
     ## organismMammal                              
     ## organismMollusc                             
     ## organismReptile                             
-    ## detect_methodeDNA:organismArthropod      ***
     ## detect_methodeDNA:organismCrustacean        
     ## detect_methodeDNA:organismFish              
+    ## detect_methodeDNA:organismInsect         ***
     ## detect_methodeDNA:organismMammal         .  
     ## detect_methodeDNA:organismMollusc        ** 
     ## detect_methodeDNA:organismReptile           
     ## detect_methodTraditional:scale(pub_year) *  
-    ## detect_methodeDNA:scale(pub_year)        ***
+    ## detect_methodeDNA:scale(pub_year)        ** 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## [[1]]
@@ -419,7 +417,7 @@ mirrors that of a multilevel random-effects meta-analysis.
 ![](Detection_meta_Taydin_files/figure-gfm/pred_fig_mod9-3.png)<!-- -->
 
     ##  contrast           odds.ratio         SE  df null z.ratio p.value
-    ##  Traditional / eDNA  0.7980421 0.03342705 Inf    1  -5.386 <0.0001
+    ##  Traditional / eDNA  0.7705801 0.03303626 Inf    1  -6.079 <0.0001
     ## 
     ## Tests are performed on the log odds ratio scale
 
@@ -437,42 +435,42 @@ mirrors that of a multilevel random-effects meta-analysis.
     ## Data: d1_trad
     ## 
     ##       AIC       BIC    logLik -2*log(L)  df.resid 
-    ##    1175.0    1223.0    -573.5    1147.0       214 
+    ##     648.7     684.3    -311.4     622.7       101 
     ## 
     ## Random effects:
     ## 
     ## Conditional model:
-    ##  Groups Name        Variance  Std.Dev. 
-    ##  paper  (Intercept) 2.164e-09 4.652e-05
-    ##  study  (Intercept) 3.330e+00 1.825e+00
-    ## Number of obs: 228, groups:  paper, 30; study, 228
+    ##  Groups Name        Variance Std.Dev.
+    ##  paper  (Intercept) 0.5541   0.7444  
+    ##  study  (Intercept) 1.6732   1.2935  
+    ## Number of obs: 114, groups:  paper, 33; study, 114
     ## 
     ## Conditional model:
-    ##                                   Estimate Std. Error z value Pr(>|z|)   
-    ## (Intercept)                        -0.9427     0.3114  -3.027  0.00247 **
-    ## MethodsPassive                      0.7821     0.7796   1.003  0.31580   
-    ## organismArthropod                   0.8478     0.9069   0.935  0.34986   
-    ## organismCrustacean                  1.1421     1.3810   0.827  0.40824   
-    ## organismFish                        1.2477     0.5609   2.224  0.02612 * 
-    ## organismMammal                      0.7349     1.5160   0.485  0.62782   
-    ## organismMollusc                    -0.2869     0.7877  -0.364  0.71566   
-    ## organismReptile                     0.4913     1.4093   0.349  0.72739   
-    ## MethodsPassive:organismArthropod   -1.9379     1.1711  -1.655  0.09797 . 
-    ## MethodsPassive:organismCrustacean  -1.2004     2.0540  -0.584  0.55893   
-    ## MethodsPassive:organismFish        -1.1271     1.1007  -1.024  0.30587   
-    ## MethodsPassive:organismMammal           NA         NA      NA       NA   
-    ## MethodsPassive:organismMollusc          NA         NA      NA       NA   
-    ## MethodsPassive:organismReptile     -1.9396     2.1447  -0.904  0.36580   
+    ##                                   Estimate Std. Error z value Pr(>|z|)  
+    ## (Intercept)                        0.36585    0.41221   0.887   0.3748  
+    ## MethodsPassive                    -0.33683    0.69858  -0.482   0.6297  
+    ## organismCrustacean                 0.50202    0.91784   0.547   0.5844  
+    ## organismFish                       0.22691    0.55524   0.409   0.6828  
+    ## organismInsect                    -0.45391    0.84014  -0.540   0.5890  
+    ## organismMammal                     0.53939    1.38867   0.388   0.6977  
+    ## organismMollusc                   -1.46059    0.78609  -1.858   0.0632 .
+    ## organismReptile                   -0.40730    1.18059  -0.345   0.7301  
+    ## MethodsPassive:organismCrustacean -0.06477    1.45445  -0.044   0.9645  
+    ## MethodsPassive:organismFish        0.06409    1.00141   0.064   0.9490  
+    ## MethodsPassive:organismInsect           NA         NA      NA       NA  
+    ## MethodsPassive:organismMammal           NA         NA      NA       NA  
+    ## MethodsPassive:organismMollusc          NA         NA      NA       NA  
+    ## MethodsPassive:organismReptile    -1.17806    1.87892  -0.627   0.5307  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ![](Detection_meta_Taydin_files/figure-gfm/active_passive_sampling-1.png)<!-- -->
 
-# Log odds for study level analysis - Taydin is still working on this.
+# Log odds for study level analysis
 
 # Log odds
 
-## Log odds study level
+## Log odds study (site) level
 
 ![](Detection_meta_Taydin_files/figure-gfm/log_odds_study_level-1.png)<!-- -->
 
@@ -533,5 +531,5 @@ mirrors that of a multilevel random-effects meta-analysis.
     [57] R6_2.6.1           TMB_1.9.19         Rdpack_2.6.5       doParallel_1.0.17 
     [61] rprojroot_2.1.1    shiny_1.13.0       evaluate_1.0.5     lattice_0.22-7    
     [65] haven_2.5.5        rbibutils_2.4.1    httpuv_1.6.16      Rcpp_1.1.1        
-    [69] coda_0.19-4.1      nlme_3.1-168       mgcv_1.9-3         xfun_0.56         
+    [69] coda_0.19-4.1      nlme_3.1-168       mgcv_1.9-4         xfun_0.56         
     [73] sjmisc_2.8.11      zoo_1.8-15         pkgconfig_2.0.3   

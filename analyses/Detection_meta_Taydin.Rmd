@@ -4,14 +4,14 @@ author: "Dr. Riley M. Anderson & Taydin Macon"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 graphics: yes
 output:
-  html_document:
-    keep_md: yes
-    theme: readable
-    mathjax: default
   github_document:
     toc: yes
     toc_depth: 5
     pandoc_args: --webtex
+  html_document:
+    keep_md: yes
+    theme: readable
+    mathjax: default
   html_notebook:
     code_folding: hide
     theme: readable
